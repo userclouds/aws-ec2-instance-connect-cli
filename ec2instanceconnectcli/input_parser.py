@@ -64,7 +64,8 @@ def parseargs(args, mode='ssh'):
             'profile': args[0].profile,
             'instance_id': args[0].instance_id,
             'region': args[0].region,
-            'zone': args[0].zone
+            'zone': args[0].zone,
+            'use_private_ip': args[0].private_ip
         }
     ]
     # We do this as an array to support future commands that may need multiple instances (eg, scp)

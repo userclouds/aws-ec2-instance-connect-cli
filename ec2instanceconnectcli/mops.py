@@ -57,6 +57,7 @@ def main(program, mode):
     parser.add_argument('-u', '--profile', action='store', help='AWS Config Profile', type=str, default=DEFAULT_PROFILE, metavar='')
     parser.add_argument('-t', '--instance_id', action='store', help='EC2 Instance ID. Required if target is hostname', type=str, default=DEFAULT_INSTANCE, metavar='')
     parser.add_argument('-d', '--debug', action="store_true", help='Turn on debug logging')
+    parser.add_argument('-p', '--private_ip', action='store_true', help='Always use private IP address')
 
     args = parser.parse_known_args()
 
@@ -73,7 +74,7 @@ def main(program, mode):
     cli_command = EC2InstanceConnectCommand(program, instance_bundles, cli_key.get_priv_key_file(), flags, program_command, logger.get_logger())
 
     try:
-        cli = EC2InstanceConnectCLI(instance_bundles, cli_key.get_pub_key(), cli_command, logger.get_logger())
+        cli = EC2InstanceConnectCLI(instance_bundles, cli_key.get_pub_key(), cli_command, logger.get_logger(), instance_bundles[0]['use_private_ip'])
         return cli.invoke_command()
     except Exception as e:
         print('Failed with:\n' + str(e))

@@ -28,7 +28,7 @@ class EC2InstanceConnectCLI(object):
     establishes an SSH connection using the respective private key
     """
 
-    def __init__(self, instance_bundles, pub_key, cli_command, logger):
+    def __init__(self, instance_bundles, pub_key, cli_command, logger, use_private_ip):
         """
         :param instance_bundles: list of dicts that provide dns name, zone, etc information about EC2 instances
         :type instance_bundles: list
@@ -38,11 +38,14 @@ class EC2InstanceConnectCLI(object):
         :type cli_command: basestring
         :param logger: CLI logging utility to send log messages to
         :type logger: ec2instanceconnectcli.EC2InstanceConnectLogger.EC2InstanceConnectLogger
+        :param use_private_ip: boolean flag to indicate if we should use the private ip address of the instance
+        :type use_private_ip: bool
         """
         self.instance_bundles = instance_bundles
         self.pub_key = pub_key
         self.logger = logger
         self.cli_command = cli_command
+        self.use_private_ip = use_private_ip
 
     def call_ec2(self):
         """
@@ -64,7 +67,11 @@ class EC2InstanceConnectCLI(object):
 
             instance_info = ec2_util.get_instance_data(session, bundle['instance_id'])
             bundle['zone'] = instance_info.availability_zone
-            #If host_info is not available, fallback to using public ipaddress and then private ipaddress.
+
+            # Use the private key if the flag was set
+            if self.use_private_ip:
+                bundle['host_info'] = instance_info.private_ip
+            # If host_info is not available, fallback to using public ipaddress and then private ipaddress.
             if not bundle['host_info']:
                 bundle['host_info'] = instance_info.public_ip if instance_info.public_ip else instance_info.private_ip
             self.logger.debug('Successfully got instance information from EC2 API for {0}'.format(bundle['instance_id']))
